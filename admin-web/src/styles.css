@@ -1,0 +1,65 @@
+:root {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #1f2937;
+  background: #f3f6fb;
+  --el-color-primary: #0f766e;
+  --el-color-primary-light-3: #2a9b91;
+  --el-color-primary-light-5: #53b9b0;
+  --el-color-primary-light-7: #8ad7d1;
+  --el-color-primary-light-8: #a7e4df;
+  --el-color-primary-light-9: #d3f3f0;
+  --el-color-primary-dark-2: #0b5b54;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 64px;
+  background: #0f766e;
+  color: #fff;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 16px;
+}
+
+.topbar a {
+  color: #ccfbf1;
+  text-decoration: none;
+}
+
+.container {
+  padding: 24px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.status {
+  margin-top: 12px;
+  color: #0f766e;
+}

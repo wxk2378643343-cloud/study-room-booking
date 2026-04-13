@@ -1,0 +1,258 @@
+{
+  "userLogin": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "role": 1,
+      "nickname": "测试用户",
+      "userId": 2,
+      "token": "MjoxNzc2MzUwMTI4OjAwZjYwMmQxYmZmMGYzMWEyM2M0OWJhNzA5YTBmYTAzZDkxYjU0ZjM5YzczYzlhYzNiZWQxM2JlNmQzMGU0NjA"
+    }
+  },
+  "userProfile": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "id": 2,
+      "phone": "13800000002",
+      "role": 1,
+      "violation_count": 1,
+      "booking_restricted_until": null,
+      "nickname": "测试用户",
+      "avatar_url": null,
+      "preferred_room_id": null
+    }
+  },
+  "userRooms": {
+    "code": 0,
+    "message": "success",
+    "data": [
+      {
+        "id": 1,
+        "name": "主馆一层自习室",
+        "location_desc": "图书馆一层东侧",
+        "facilities": "打印,饮水,储物柜",
+        "seat_total": 24,
+        "status": 1,
+        "avg_score": 0.0
+      },
+      {
+        "id": 2,
+        "name": "主馆二层静音区",
+        "location_desc": "图书馆二层北侧",
+        "facilities": "饮水,储物柜",
+        "seat_total": 18,
+        "status": 1,
+        "avg_score": 0.0
+      }
+    ]
+  },
+  "userBookings": {
+    "code": 0,
+    "message": "success",
+    "data": [
+      {
+        "id": 9,
+        "order_no": "BK20260413222258a917b3",
+        "user_id": 2,
+        "room_id": 1,
+        "seat_id": 2,
+        "booking_date": "2026-04-13",
+        "slot_code": 1,
+        "start_time": "2026-04-13T08:00:00",
+        "end_time": "2026-04-13T10:00:00",
+        "status": 3,
+        "voucher_code": "VCH-a1cb8670-7317-4816-b47a-f924f613d824",
+        "cancel_reason": "用户主动取消",
+        "created_at": "2026-04-13T22:22:58",
+        "updated_at": "2026-04-13T22:26:25",
+        "room_name": "主馆一层自习室",
+        "seat_no": "A02",
+        "slot_text": "08:00-10:00"
+      },
+      {
+        "id": 8,
+        "order_no": "BK20260413214125142e85",
+        "user_id": 2,
+        "room_id": 1,
+        "seat_id": 2,
+        "booking_date": "2026-04-13",
+        "slot_code": 1,
+        "start_time": "2026-04-13T08:00:00",
+        "end_time": "2026-04-13T10:00:00",
+        "status": 3,
+        "voucher_code": "VCH-63baa7a7-b10d-4266-b094-3f1cafcc7efa",
+        "cancel_reason": "用户主动取消",
+        "created_at": "2026-04-13T21:41:25",
+        "updated_at": "2026-04-13T21:41:31",
+        "room_name": "主馆一层自习室",
+        "seat_no": "A02",
+        "slot_text": "08:00-10:00"
+      },
+      {
+        "id": 3,
+        "order_no": "BK20260413200730aa7cd1",
+        "user_id": 2,
+        "room_id": 2,
+        "seat_id": 13,
+        "booking_date": "2026-04-13",
+        "slot_code": 1,
+        "start_time": "2026-04-13T08:00:00",
+        "end_time": "2026-04-13T12:00:00",
+        "status": 4,
+        "voucher_code": "VCH-55afd228-8f08-46a9-87e1-56c8dbb8d726",
+        "cancel_reason": "超时未签到",
+        "created_at": "2026-04-13T20:07:30",
+        "updated_at": "2026-04-13T20:30:20",
+        "room_name": "主馆二层静音区",
+        "seat_no": "S01",
+        "slot_text": "08:00-10:00"
+      },
+      {
+        "id": 2,
+        "order_no": "BK20260413200631376ab4",
+        "user_id": 2,
+        "room_id": 1,
+        "seat_id": 2,
+        "booking_date": "2026-04-13",
+        "slot_code": 1,
+        "start_time": "2026-04-13T08:00:00",
+        "end_time": "2026-04-13T12:00:00",
+        "status": 3,
+        "voucher_code": "VCH-b9518c45-537d-47d6-9890-744fbbc83b40",
+        "cancel_reason": "用户主动取消",
+        "created_at": "2026-04-13T20:06:31",
+        "updated_at": "2026-04-13T20:06:56",
+        "room_name": "主馆一层自习室",
+        "seat_no": "A02",
+        "slot_text": "08:00-10:00"
+      },
+      {
+        "id": 1,
+        "order_no": "BK20260413200630d99e84",
+        "user_id": 2,
+        "room_id": 1,
+        "seat_id": 1,
+        "booking_date": "2026-04-13",
+        "slot_code": 1,
+        "start_time": "2026-04-13T08:00:00",
+        "end_time": "2026-04-13T12:00:00",
+        "status": 3,
+        "voucher_code": "VCH-86f6faad-a785-4ee5-8a4b-aacd31b1da32",
+        "cancel_reason": "用户主动取消",
+        "created_at": "2026-04-13T20:06:30",
+        "updated_at": "2026-04-13T20:07:08",
+        "room_name": "主馆一层自习室",
+        "seat_no": "A01",
+        "slot_text": "08:00-10:00"
+      }
+    ]
+  },
+  "adminLogin": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "role": 9,
+      "nickname": "管理员",
+      "userId": 1,
+      "token": "MToxNzc2MzUwMTI4OjdjNzBmOTYwMmRiNTUzMjAyZTFjMmRkYmNiN2NjNTE2YjBjZDZkZGQ0MDZmM2Q5ZjYyNDFjODFlMmQ2ZTAxZDE"
+    }
+  },
+  "adminDashboard": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "completedBookings": 1,
+      "hotSeatType": [
+        {
+          "seat_type": 1,
+          "c": 8
+        },
+        {
+          "seat_type": 2,
+          "c": 1
+        }
+      ],
+      "totalBookings": 9,
+      "violations": 2,
+      "monthlyTrend": [
+        {
+          "ym": "2026-04",
+          "total": 9
+        }
+      ]
+    }
+  },
+  "adminUsers": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "total": 3,
+      "pageSize": 8,
+      "page": 1,
+      "items": [
+        {
+          "id": 3,
+          "phone": "18835371504",
+          "role": 1,
+          "status": 1,
+          "violation_count": 0,
+          "booking_restricted_until": null,
+          "created_at": "2026-04-13T20:54:50",
+          "nickname": "dora"
+        },
+        {
+          "id": 2,
+          "phone": "13800000002",
+          "role": 1,
+          "status": 1,
+          "violation_count": 1,
+          "booking_restricted_until": null,
+          "created_at": "2026-04-13T20:04:00",
+          "nickname": "测试用户"
+        },
+        {
+          "id": 1,
+          "phone": "13800000001",
+          "role": 9,
+          "status": 1,
+          "violation_count": 1,
+          "booking_restricted_until": null,
+          "created_at": "2026-04-13T20:04:00",
+          "nickname": "管理员"
+        }
+      ]
+    }
+  },
+  "adminRooms": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "total": 2,
+      "pageSize": 8,
+      "page": 1,
+      "items": [
+        {
+          "id": 1,
+          "name": "主馆一层自习室",
+          "location_desc": "图书馆一层东侧",
+          "facilities": "打印,饮水,储物柜",
+          "seat_total": 24,
+          "status": 1,
+          "created_at": "2026-04-13T20:04:00",
+          "updated_at": "2026-04-13T20:04:00"
+        },
+        {
+          "id": 2,
+          "name": "主馆二层静音区",
+          "location_desc": "图书馆二层北侧",
+          "facilities": "饮水,储物柜",
+          "seat_total": 18,
+          "status": 1,
+          "created_at": "2026-04-13T20:04:00",
+          "updated_at": "2026-04-13T20:04:00"
+        }
+      ]
+    }
+  }
+}
