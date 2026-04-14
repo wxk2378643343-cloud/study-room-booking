@@ -11,7 +11,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BizException.class)
     public ApiResponse<Void> handleBiz(BizException ex, HttpServletResponse response) {
-        response.setStatus(400);
+        response.setStatus(isUnauthorized(ex.getMessage()) ? 401 : 400);
         return ApiResponse.fail(ex.getMessage());
     }
 
@@ -25,5 +25,16 @@ public class GlobalExceptionHandler {
     public ApiResponse<Void> handleEx(Exception ex, HttpServletResponse response) {
         response.setStatus(500);
         return ApiResponse.fail("server error: " + ex.getMessage());
+    }
+
+    private boolean isUnauthorized(String message) {
+        if (message == null) {
+            return false;
+        }
+        return "unauthorized".equals(message)
+            || "invalid token".equals(message)
+            || "token expired".equals(message)
+            || "用户已禁用".equals(message)
+            || "用户不存在或已禁用".equals(message);
     }
 }

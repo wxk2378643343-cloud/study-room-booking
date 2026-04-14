@@ -51,7 +51,7 @@ public class RoomService {
     public List<Map<String, Object>> seatSlots(Long roomId, LocalDate date, Integer slotCode) {
         return jdbcTemplate.queryForList(
             "SELECT s.id seat_id, s.seat_no, s.seat_type, s.status seat_base_status, " +
-                "COALESCE(ss.status, IF(s.status = 2, 3, 0)) AS slot_status " +
+                "ss.current_order_id, COALESCE(ss.status, IF(s.status = 2, 3, 0)) AS slot_status " +
                 "FROM seat s LEFT JOIN seat_slot ss ON s.id = ss.seat_id AND ss.booking_date = ? AND ss.slot_code = ? " +
                 "WHERE s.room_id = ? ORDER BY s.id",
             date, slotCode, roomId

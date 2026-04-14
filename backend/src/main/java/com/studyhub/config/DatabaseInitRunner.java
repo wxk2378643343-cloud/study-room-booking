@@ -37,6 +37,7 @@ public class DatabaseInitRunner implements ApplicationRunner {
         }
         if (isDatabaseInitialized()) {
             ensureUtf8mb4();
+            ensureIncrementalSchema();
             log.info("Database already initialized, skip schema/seed.");
             ensureDemoUsers();
             return;
@@ -49,6 +50,7 @@ public class DatabaseInitRunner implements ApplicationRunner {
         populator.addScript(new ClassPathResource("db/seed.sql"));
         populator.execute(dataSource);
         ensureUtf8mb4();
+        ensureIncrementalSchema();
         ensureDemoUsers();
         log.info("Database initialization completed.");
     }
@@ -88,6 +90,21 @@ public class DatabaseInitRunner implements ApplicationRunner {
                 "ALTER TABLE `" + tableName + "` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             );
             log.info("Updated table charset/collation to utf8mb4 for table {}", tableName);
+        }
+    }
+
+    private void ensureIncrementalSchema() {
+        Integer reportTypeColumn = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS " +
+                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'violation_report' AND COLUMN_NAME = 'report_type'",
+            Integer.class
+        );
+        if (reportTypeColumn == null || reportTypeColumn == 0) {
+            jdbcTemplate.execute(
+                "ALTER TABLE violation_report " +
+                    "ADD COLUMN report_type TINYINT NOT NULL DEFAULT 2 COMMENT '1迟到/未签到 2占座 3临时离开超时' AFTER seat_id"
+            );
+            log.info("Added column violation_report.report_type");
         }
     }
 

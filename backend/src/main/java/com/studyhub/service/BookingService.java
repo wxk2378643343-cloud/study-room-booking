@@ -251,9 +251,21 @@ public class BookingService {
     }
 
     private void recordViolation(Long userId, Long orderId, int type, String remark) {
+        Integer exists = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM violation_record WHERE user_id = ? AND order_id = ? AND violation_type = ?",
+            Integer.class,
+            userId,
+            orderId,
+            type
+        );
+        if (exists != null && exists > 0) {
+            return;
+        }
         jdbcTemplate.update("INSERT INTO violation_record(user_id, order_id, violation_type, remark) VALUES (?, ?, ?, ?)",
             userId, orderId, type, remark);
         jdbcTemplate.update("UPDATE sys_user SET violation_count = violation_count + 1 WHERE id = ?", userId);
+        jdbcTemplate.update("UPDATE points_account SET points_balance = points_balance - 10 WHERE user_id = ?", userId);
+        jdbcTemplate.update("INSERT INTO points_txn(user_id, change_amount, biz_type, biz_ref_id) VALUES (?, -10, 4, ?)", userId, orderId);
         Integer count = jdbcTemplate.queryForObject("SELECT violation_count FROM sys_user WHERE id = ?", Integer.class, userId);
         if (count != null && count >= 3) {
             jdbcTemplate.update("UPDATE sys_user SET booking_restricted_until = DATE_ADD(NOW(), INTERVAL 7 DAY) WHERE id = ?", userId);

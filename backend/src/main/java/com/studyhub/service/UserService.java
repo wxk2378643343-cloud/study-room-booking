@@ -75,10 +75,10 @@ public class UserService {
         jdbcTemplate.update("UPDATE notification SET is_read = 1 WHERE id = ? AND user_id = ?", id, userId);
     }
 
-    public void createReport(Long userId, Long orderId, Long seatId, String imageUrl, String description) {
+    public void createReport(Long userId, Long orderId, Long seatId, Integer reportType, String imageUrl, String description) {
         jdbcTemplate.update(
-            "INSERT INTO violation_report(reporter_user_id, order_id, seat_id, image_url, description_text, status) VALUES (?, ?, ?, ?, ?, 0)",
-            userId, orderId, seatId, imageUrl, description
+            "INSERT INTO violation_report(reporter_user_id, order_id, seat_id, report_type, image_url, description_text, status) VALUES (?, ?, ?, ?, ?, ?, 0)",
+            userId, orderId, seatId, reportType, imageUrl, description
         );
     }
 

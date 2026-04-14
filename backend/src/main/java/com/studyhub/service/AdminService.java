@@ -3,6 +3,7 @@ package com.studyhub.service;
 import com.studyhub.exception.BizException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -205,12 +206,22 @@ public class AdminService {
         );
     }
 
+    @Transactional
     public void handleReport(Long adminId, Long reportId, Integer status, String note) {
         Map<String, Object> report = jdbcTemplate.queryForMap("SELECT * FROM violation_report WHERE id = ?", reportId);
+        int currentStatus = ((Number) report.get("status")).intValue();
+        if (currentStatus != 0) {
+            throw new BizException("该举报已处理，请刷新列表");
+        }
         if (status == 1) {
             Object orderId = report.get("order_id");
             if (orderId != null) {
-                jdbcTemplate.update("UPDATE booking_order SET status = 3, cancel_reason='举报核实清座' WHERE id = ? AND status IN (0,1)", orderId);
+                Map<String, Object> order = jdbcTemplate.queryForMap(
+                    "SELECT id, user_id, seat_id, booking_date, slot_code, status FROM booking_order WHERE id = ?",
+                    orderId
+                );
+                int reportType = ((Number) report.getOrDefault("report_type", 2)).intValue();
+                recordViolation(((Number) order.get("user_id")).longValue(), ((Number) order.get("id")).longValue(), reportType, "举报核实属实");
             }
         }
         jdbcTemplate.update(
@@ -248,6 +259,30 @@ public class AdminService {
         Integer role = jdbcTemplate.queryForObject("SELECT role FROM sys_user WHERE id = ?", Integer.class, userId);
         if (role == null || role != 9) {
             throw new BizException("管理员权限不足");
+        }
+    }
+
+    private void recordViolation(Long userId, Long orderId, int type, String remark) {
+        Integer exists = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM violation_record WHERE user_id = ? AND order_id = ? AND violation_type = ?",
+            Integer.class,
+            userId,
+            orderId,
+            type
+        );
+        if (exists != null && exists > 0) {
+            return;
+        }
+        jdbcTemplate.update(
+            "INSERT INTO violation_record(user_id, order_id, violation_type, remark) VALUES (?, ?, ?, ?)",
+            userId, orderId, type, remark
+        );
+        jdbcTemplate.update("UPDATE sys_user SET violation_count = violation_count + 1 WHERE id = ?", userId);
+        jdbcTemplate.update("UPDATE points_account SET points_balance = points_balance - 10 WHERE user_id = ?", userId);
+        jdbcTemplate.update("INSERT INTO points_txn(user_id, change_amount, biz_type, biz_ref_id) VALUES (?, -10, 4, ?)", userId, orderId);
+        Integer count = jdbcTemplate.queryForObject("SELECT violation_count FROM sys_user WHERE id = ?", Integer.class, userId);
+        if (count != null && count >= 3) {
+            jdbcTemplate.update("UPDATE sys_user SET booking_restricted_until = DATE_ADD(NOW(), INTERVAL 7 DAY) WHERE id = ?", userId);
         }
     }
 

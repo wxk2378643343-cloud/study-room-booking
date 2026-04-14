@@ -100,6 +100,7 @@ public class UserController {
             authContext.currentUserId(request),
             body.get("orderId") == null ? null : ((Number) body.get("orderId")).longValue(),
             ((Number) body.get("seatId")).longValue(),
+            ((Number) body.getOrDefault("reportType", 2)).intValue(),
             String.valueOf(body.getOrDefault("imageUrl", "")),
             String.valueOf(body.getOrDefault("description", ""))
         );

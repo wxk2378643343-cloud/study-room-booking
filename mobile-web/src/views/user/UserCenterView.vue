@@ -289,8 +289,8 @@ const logout = () => {
 
 const couponText = (s: number) => ({ 0: "未使用", 1: "已使用", 2: "已过期" }[s] || "未知");
 const couponTag = (s: number): "success" | "info" | "warning" => ({ 0: "success", 1: "info", 2: "warning" }[s] || "info");
-const violationText = (t: number) => ({ 1: "迟到", 2: "占座", 3: "离开超时" }[t] || `类型${t}`);
-const pointsBizText = (t: number) => ({ 1: "按时签退奖励", 2: "兑换扣减", 3: "管理员调整" }[t] || `类型${t}`);
+const violationText = (t: number) => ({ 1: "迟到/未签到", 2: "占座", 3: "临时离开超时" }[t] || `类型${t}`);
+const pointsBizText = (t: number) => ({ 1: "按时签退奖励", 2: "兑换扣减", 3: "管理员调整", 4: "违规扣减" }[t] || `类型${t}`);
 
 load();
 </script>

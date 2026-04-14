@@ -191,6 +191,11 @@
             </template>
           </el-table-column>
           <el-table-column prop="description_text" label="描述" />
+          <el-table-column label="举报类型" width="130">
+            <template #default="{ row }">
+              {{ violationTypeText(row.report_type) }}
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
               <el-tag :type="reportStatusTagType(row.status)">{{ reportStatusText(row.status) }}</el-tag>
@@ -715,6 +720,11 @@ function reportStatusTagType(status: number): "warning" | "success" | "info" {
   if (Number(status) === 0) return "warning";
   if (Number(status) === 1) return "success";
   return "info";
+}
+
+function violationTypeText(type: number) {
+  const m: Record<number, string> = { 1: "迟到/未签到", 2: "占座", 3: "临时离开超时" };
+  return m[Number(type)] || `类型${type}`;
 }
 
 function userStatusText(status: number) {

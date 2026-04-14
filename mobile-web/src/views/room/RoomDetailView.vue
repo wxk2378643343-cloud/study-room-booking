@@ -46,13 +46,30 @@
           {{ seat.seat_no }}
         </button>
       </div>
-    </div>
+  </div>
+
+    <el-dialog v-model="voucherVisible" title="预约成功" width="360px">
+      <div class="voucher-panel">
+        <img v-if="voucherQrUrl" :src="voucherQrUrl" alt="签到二维码" class="voucher-qr" />
+        <div v-else class="voucher-empty">二维码生成中...</div>
+        <div class="voucher-meta">{{ voucherSummary }}</div>
+        <div class="voucher-code">{{ voucherCode }}</div>
+        <div class="voucher-tip">请保存此二维码，签到时出示或上传识别。</div>
+      </div>
+    </el-dialog>
 
     <el-dialog v-model="reportVisible" title="举报占座" width="320px" class="report-dialog">
       <div class="report-tip">请尽量描述现场情况，便于管理员快速核实处理。</div>
       <el-form :model="reportForm" label-width="84px" class="report-form">
         <el-form-item label="座位号">
           <el-input :model-value="reportForm.seatNo" disabled />
+        </el-form-item>
+        <el-form-item label="举报类型">
+          <el-select v-model="reportForm.reportType" style="width: 100%">
+            <el-option :value="2" label="占座" />
+            <el-option :value="1" label="迟到/未签到" />
+            <el-option :value="3" label="临时离开超时" />
+          </el-select>
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="reportForm.description" type="textarea" :rows="3" placeholder="请输入举报描述" />
@@ -79,8 +96,9 @@ import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { apiGet, apiPost, apiUpload } from "../../api/http";
+import QRCode from "qrcode";
 
-type SeatSlot = { seat_id: number; seat_no: string; slot_status: number };
+type SeatSlot = { seat_id: number; seat_no: string; slot_status: number; current_order_id?: number | null };
 
 const route = useRoute();
 const router = useRouter();
@@ -89,11 +107,17 @@ const roomName = ref("");
 const date = ref(new Date().toISOString().slice(0, 10));
 const slotCode = ref(1);
 const seatSlots = ref<SeatSlot[]>([]);
+const voucherVisible = ref(false);
+const voucherQrUrl = ref("");
+const voucherCode = ref("");
+const voucherSummary = ref("");
 const reportVisible = ref(false);
 const reportImageInput = ref<HTMLInputElement | null>(null);
 const reportForm = ref({
+  orderId: null as number | null,
   seatId: null as number | null,
   seatNo: "",
+  reportType: 2,
   description: "",
   imageUrl: "",
   uploading: false
@@ -129,13 +153,20 @@ const loadSlots = async () => {
 
 const book = async (seat: SeatSlot) => {
   try {
-    const data = await apiPost<{ orderNo: string }>("/bookings", {
+    const data = await apiPost<{ orderNo: string; voucherCode: string }>("/bookings", {
       roomId,
       seatId: seat.seat_id,
       date: date.value,
       slotCode: slotCode.value
     });
     ElMessage.success(`预约成功，订单:${data.orderNo}`);
+    voucherCode.value = data.voucherCode;
+    voucherSummary.value = `${roomName.value || "自习室"} · 座位 ${seat.seat_no} · ${date.value} · ${slotOptions.find((item) => item.code === slotCode.value)?.time || ""}`;
+    voucherVisible.value = true;
+    voucherQrUrl.value = await QRCode.toDataURL(data.voucherCode, {
+      width: 220,
+      margin: 1
+    });
     await loadSlots();
   } catch (err: any) {
     ElMessage.error(err?.response?.data?.message || "预约失败");
@@ -148,8 +179,10 @@ const onSeatClick = async (seat: SeatSlot) => {
     return;
   }
   reportForm.value = {
+    orderId: seat.current_order_id ?? null,
     seatId: seat.seat_id,
     seatNo: seat.seat_no,
+    reportType: 2,
     description: "",
     imageUrl: "",
     uploading: false
@@ -193,8 +226,9 @@ const submitReport = async () => {
   }
   try {
     await apiPost("/users/reports", {
-      orderId: null,
+      orderId: reportForm.value.orderId,
       seatId: reportForm.value.seatId,
+      reportType: reportForm.value.reportType,
       imageUrl: reportForm.value.imageUrl.trim(),
       description: reportForm.value.description.trim()
     });
@@ -317,6 +351,44 @@ loadSlots();
   margin-bottom: 12px;
   font-size: 12px;
   color: #475569;
+}
+.voucher-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.voucher-qr {
+  width: 220px;
+  height: 220px;
+  padding: 10px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #dbe7e4;
+}
+.voucher-empty {
+  width: 220px;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #dbe7e4;
+}
+.voucher-meta {
+  color: #334155;
+  font-size: 13px;
+}
+.voucher-code {
+  font-size: 12px;
+  color: #0f766e;
+  word-break: break-all;
+}
+.voucher-tip {
+  color: #64748b;
+  font-size: 12px;
 }
 .legend span {
   display: flex;

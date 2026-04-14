@@ -37,6 +37,7 @@
           <span>{{ row.cancel_reason }}</span>
         </div>
         <div class="order-actions">
+          <el-button v-if="row.status === 0" class="brand-btn" @click="openVoucherModal(row)">查看签到码</el-button>
           <el-button v-if="row.status === 0" class="outline-btn" @click="openCheckinModal()">去签到</el-button>
           <el-button v-if="row.status === 0" class="text-btn" @click="cancel(row.id)">取消预约</el-button>
           <el-button v-if="row.status === 1" class="outline-btn" @click="leave(row.id)">临时离开</el-button>
@@ -54,11 +55,28 @@
       </div>
     </el-dialog>
 
+    <el-dialog v-model="voucherVisible" title="签到二维码" width="360px">
+      <div class="voucher-panel">
+        <img v-if="voucherQrUrl" :src="voucherQrUrl" alt="签到二维码" class="voucher-qr" />
+        <div v-else class="voucher-empty">二维码生成中...</div>
+        <div class="voucher-meta">{{ voucherOrderSummary }}</div>
+        <div class="voucher-code">{{ voucherCode }}</div>
+        <div class="voucher-tip">到场后可出示此码签到，也可保存后再扫码上传。</div>
+      </div>
+    </el-dialog>
+
     <el-dialog v-model="reportVisible" title="举报占座" width="320px" class="report-dialog">
       <div class="report-tip">请尽量描述现场情况，便于管理员快速核实处理。</div>
       <el-form :model="reportForm" label-width="84px" class="report-form">
         <el-form-item label="座位号">
           <el-input :model-value="reportForm.seatNo" disabled />
+        </el-form-item>
+        <el-form-item label="举报类型">
+          <el-select v-model="reportForm.reportType" style="width: 100%">
+            <el-option :value="2" label="占座" />
+            <el-option :value="1" label="迟到/未签到" />
+            <el-option :value="3" label="临时离开超时" />
+          </el-select>
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="reportForm.description" type="textarea" :rows="3" placeholder="请输入举报描述" />
@@ -85,6 +103,7 @@ import { computed, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { apiGet, apiPost, apiUpload } from "../../api/http";
 import jsQR from "jsqr";
+import QRCode from "qrcode";
 
 type Order = {
   id: number;
@@ -105,11 +124,15 @@ const activeTab = ref("all");
 const qrInput = ref<HTMLInputElement | null>(null);
 const reportImageInput = ref<HTMLInputElement | null>(null);
 const checkinVisible = ref(false);
+const voucherVisible = ref(false);
+const voucherQrUrl = ref("");
+const voucherOrderSummary = ref("");
 const reportVisible = ref(false);
 const reportForm = ref({
   orderId: null as number | null,
   seatId: null as number | null,
   seatNo: "",
+  reportType: 2,
   description: "",
   imageUrl: "",
   uploading: false
@@ -149,6 +172,21 @@ const checkin = async () => {
 const openCheckinModal = (voucher?: string) => {
   voucherCode.value = voucher || "";
   checkinVisible.value = true;
+};
+
+const openVoucherModal = async (row: Order) => {
+  voucherCode.value = row.voucher_code;
+  voucherOrderSummary.value = `${row.room_name} · 座位 ${row.seat_no} · ${row.booking_date} ${row.slot_text || slotText(row.slot_code)}`;
+  voucherVisible.value = true;
+  try {
+    voucherQrUrl.value = await QRCode.toDataURL(row.voucher_code, {
+      width: 220,
+      margin: 1
+    });
+  } catch {
+    voucherQrUrl.value = "";
+    ElMessage.error("二维码生成失败");
+  }
 };
 
 const pickQrImage = () => {
@@ -222,6 +260,7 @@ const openReportModal = (row: Order) => {
     orderId: row.id,
     seatId: row.seat_id ?? null,
     seatNo: row.seat_no,
+    reportType: 2,
     description: "",
     imageUrl: "",
     uploading: false
@@ -267,6 +306,7 @@ const submitReport = async () => {
     await apiPost("/users/reports", {
       orderId: reportForm.value.orderId,
       seatId: reportForm.value.seatId,
+      reportType: reportForm.value.reportType,
       imageUrl: reportForm.value.imageUrl.trim(),
       description: reportForm.value.description.trim()
     });
@@ -398,6 +438,44 @@ load();
 .checkin-tip {
   color: #475569;
   font-size: 13px;
+}
+.voucher-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.voucher-qr {
+  width: 220px;
+  height: 220px;
+  padding: 10px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #dbe7e4;
+}
+.voucher-empty {
+  width: 220px;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #dbe7e4;
+}
+.voucher-meta {
+  color: #334155;
+  font-size: 13px;
+}
+.voucher-code {
+  font-size: 12px;
+  color: #0f766e;
+  word-break: break-all;
+}
+.voucher-tip {
+  color: #64748b;
+  font-size: 12px;
 }
 .tab-row {
   display: flex;
