@@ -63,8 +63,12 @@
         <el-form-item label="描述">
           <el-input v-model="reportForm.description" type="textarea" :rows="3" placeholder="请输入举报描述" />
         </el-form-item>
-        <el-form-item label="图片URL">
-          <el-input v-model="reportForm.imageUrl" placeholder="可选：现场照片链接" />
+        <el-form-item label="现场图片">
+          <div class="report-upload">
+            <el-button class="outline-btn" @click="pickReportImage">上传图片</el-button>
+            <span class="upload-tip">{{ reportForm.uploading ? "上传中..." : reportForm.imageUrl ? "已上传" : "选填，支持 jpg/png/webp" }}</span>
+          </div>
+          <img v-if="reportForm.imageUrl" :src="reportForm.imageUrl" alt="举报图片" class="report-preview" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -72,13 +76,14 @@
         <el-button class="warn-btn" @click="submitReport">提交举报</el-button>
       </template>
     </el-dialog>
+    <input ref="reportImageInput" class="hidden-input" type="file" accept="image/*" @change="onReportImageChange" />
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { apiGet, apiPost } from "../../api/http";
+import { apiGet, apiPost, apiUpload } from "../../api/http";
 import jsQR from "jsqr";
 
 type Order = {
@@ -98,6 +103,7 @@ const voucherCode = ref("");
 const orders = ref<Order[]>([]);
 const activeTab = ref("all");
 const qrInput = ref<HTMLInputElement | null>(null);
+const reportImageInput = ref<HTMLInputElement | null>(null);
 const checkinVisible = ref(false);
 const reportVisible = ref(false);
 const reportForm = ref({
@@ -105,7 +111,8 @@ const reportForm = ref({
   seatId: null as number | null,
   seatNo: "",
   description: "",
-  imageUrl: ""
+  imageUrl: "",
+  uploading: false
 });
 const tabOptions = [
   { label: "全部", value: "all" },
@@ -216,9 +223,35 @@ const openReportModal = (row: Order) => {
     seatId: row.seat_id ?? null,
     seatNo: row.seat_no,
     description: "",
-    imageUrl: ""
+    imageUrl: "",
+    uploading: false
   };
   reportVisible.value = true;
+};
+
+const pickReportImage = () => {
+  reportImageInput.value?.click();
+};
+
+const onReportImageChange = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  try {
+    reportForm.value.uploading = true;
+    const formData = new FormData();
+    formData.append("file", file);
+    const data = await apiUpload<{ url: string }>("/users/report-images", formData);
+    reportForm.value.imageUrl = data.url;
+    ElMessage.success("图片上传成功");
+  } catch (err: any) {
+    ElMessage.error(err?.response?.data?.message || "图片上传失败");
+  } finally {
+    reportForm.value.uploading = false;
+    if (reportImageInput.value) {
+      reportImageInput.value.value = "";
+    }
+  }
 };
 
 const submitReport = async () => {
@@ -483,7 +516,7 @@ load();
 .warn-btn {
   border: none;
   color: #fff;
-  background: #d97706;
+  background: #0f766e;
   border-radius: 10px;
 }
 .report-tip {
@@ -494,6 +527,24 @@ load();
   border: 1px solid #fed7aa;
   color: #9a3412;
   font-size: 12px;
+}
+.report-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.upload-tip {
+  font-size: 12px;
+  color: #64748b;
+}
+.report-preview {
+  display: block;
+  margin-top: 8px;
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dbe7e4;
 }
 .report-form :deep(.el-textarea__inner),
 .report-form :deep(.el-input__wrapper) {
@@ -508,7 +559,7 @@ load();
 .report-dialog :deep(.el-dialog__header) {
   margin: 0;
   padding: 14px 16px 12px;
-  background: linear-gradient(140deg, #b45309, #d97706);
+  background: linear-gradient(140deg, #0f766e, #0e8f85);
 }
 .report-dialog :deep(.el-dialog__title) {
   color: #fff7ed;

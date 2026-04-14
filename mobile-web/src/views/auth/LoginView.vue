@@ -43,11 +43,12 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { apiPost } from "../../api/http";
 import { useAuthStore } from "../../stores/auth";
 
 const router = useRouter();
+const route = useRoute();
 const auth = useAuthStore();
 const tab = ref("login");
 
@@ -59,7 +60,7 @@ const login = async () => {
     const data = await apiPost<{ token: string; userId: number; nickname: string; role: number }>("/auth/login", loginForm);
     auth.setLogin(data.token, { userId: data.userId, nickname: data.nickname, role: data.role });
     ElMessage.success("登录成功");
-    router.push("/");
+    router.push(String(route.query.redirect || "/home"));
   } catch (err: any) {
     ElMessage.error(err?.response?.data?.message || "登录失败");
   }
@@ -79,7 +80,7 @@ const register = async () => {
     const data = await apiPost<{ token: string; userId: number; nickname: string }>("/auth/register", registerForm);
     auth.setLogin(data.token, { userId: data.userId, nickname: data.nickname, role: 1 });
     ElMessage.success("注册成功");
-    router.push("/");
+    router.push(String(route.query.redirect || "/home"));
   } catch (err: any) {
     ElMessage.error(err?.response?.data?.message || "注册失败");
   }

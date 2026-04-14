@@ -22,14 +22,14 @@ const router = useRouter();
 const auth = useAuthStore();
 
 const tabs = computed(() => [
-  { label: "首页", path: "/" },
+  { label: "首页", path: "/home" },
   { label: "自习室", path: "/rooms" },
   { label: "预约", path: "/booking" },
   { label: auth.isLogin ? "我的" : "登录", path: auth.isLogin ? "/user" : "/login" }
 ]);
 
 const isActive = (path: string) => {
-  if (path === "/") return route.path === "/";
+  if (path === "/home") return route.path === "/home";
   return route.path.startsWith(path);
 };
 

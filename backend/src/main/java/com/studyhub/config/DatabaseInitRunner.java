@@ -11,6 +11,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @Component
 public class DatabaseInitRunner implements ApplicationRunner {
@@ -34,11 +35,8 @@ public class DatabaseInitRunner implements ApplicationRunner {
             log.info("Database auto init disabled.");
             return;
         }
-        Integer exists = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'sys_user'",
-            Integer.class
-        );
-        if (exists != null && exists > 0) {
+        if (isDatabaseInitialized()) {
+            ensureUtf8mb4();
             log.info("Database already initialized, skip schema/seed.");
             ensureDemoUsers();
             return;
@@ -50,8 +48,47 @@ public class DatabaseInitRunner implements ApplicationRunner {
         populator.addScript(new ClassPathResource("db/schema.sql"));
         populator.addScript(new ClassPathResource("db/seed.sql"));
         populator.execute(dataSource);
+        ensureUtf8mb4();
         ensureDemoUsers();
         log.info("Database initialization completed.");
+    }
+
+    private boolean isDatabaseInitialized() {
+        Integer tableCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM information_schema.tables " +
+                "WHERE table_schema = DATABASE() AND table_name IN ('sys_user', 'user_profile')",
+            Integer.class
+        );
+        return tableCount != null && tableCount == 2;
+    }
+
+    private void ensureUtf8mb4() {
+        String databaseName = jdbcTemplate.queryForObject("SELECT DATABASE()", String.class);
+        if (databaseName == null || databaseName.isBlank()) {
+            return;
+        }
+
+        String databaseCollation = jdbcTemplate.queryForObject(
+            "SELECT DEFAULT_COLLATION_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = DATABASE()",
+            String.class
+        );
+        if (databaseCollation == null || !databaseCollation.startsWith("utf8mb4")) {
+            jdbcTemplate.execute("ALTER DATABASE `" + databaseName + "` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
+            log.info("Updated database charset/collation to utf8mb4 for schema {}", databaseName);
+        }
+
+        List<String> tablesToConvert = jdbcTemplate.query(
+            "SELECT TABLE_NAME FROM information_schema.TABLES " +
+                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE' " +
+                "AND (TABLE_COLLATION IS NULL OR TABLE_COLLATION NOT LIKE 'utf8mb4%')",
+            (rs, rowNum) -> rs.getString(1)
+        );
+        for (String tableName : tablesToConvert) {
+            jdbcTemplate.execute(
+                "ALTER TABLE `" + tableName + "` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            );
+            log.info("Updated table charset/collation to utf8mb4 for table {}", tableName);
+        }
     }
 
     private void ensureDemoUsers() {

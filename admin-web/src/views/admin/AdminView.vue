@@ -182,6 +182,14 @@
         <el-table :data="reports" border>
           <el-table-column prop="id" label="ID" width="70" />
           <el-table-column prop="reporter_phone" label="举报人" width="130" />
+          <el-table-column label="现场图片" width="120">
+            <template #default="{ row }">
+              <a v-if="row.image_url" :href="row.image_url" target="_blank" rel="noreferrer" class="report-image-link">
+                <img :src="row.image_url" alt="举报图片" class="report-image-thumb" />
+              </a>
+              <span v-else>无</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="description_text" label="描述" />
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
@@ -851,5 +859,15 @@ init();
 }
 .chart {
   height: 280px;
+}
+.report-image-link {
+  display: inline-block;
+}
+.report-image-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #dbe7e4;
 }
 </style>

@@ -10,7 +10,11 @@ import { useAuthStore } from "../stores/auth";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: "/", name: "home", component: HomeView },
+    {
+      path: "/",
+      redirect: () => (localStorage.getItem("token") ? "/home" : "/login")
+    },
+    { path: "/home", name: "home", component: HomeView },
     { path: "/login", name: "login", component: LoginView },
     { path: "/rooms", name: "rooms", component: RoomsView },
     { path: "/rooms/:roomId", name: "room-detail", component: RoomDetailView },
@@ -20,12 +24,19 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
+  const token = localStorage.getItem("token");
   const auth = useAuthStore();
-  if (to.path === "/login" || to.path === "/") {
+  if (!auth.token && token) {
+    auth.token = token;
+  }
+  if (to.path === "/login") {
     return true;
   }
-  if (!auth.isLogin) {
-    return "/login";
+  if (!token) {
+    return {
+      path: "/login",
+      query: to.fullPath ? { redirect: to.fullPath } : undefined
+    };
   }
   return true;
 });

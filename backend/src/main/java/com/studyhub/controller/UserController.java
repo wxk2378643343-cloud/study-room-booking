@@ -2,12 +2,24 @@ package com.studyhub.controller;
 
 import com.studyhub.auth.AuthContext;
 import com.studyhub.common.ApiResponse;
+import com.studyhub.exception.BizException;
 import com.studyhub.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -92,5 +104,45 @@ public class UserController {
             String.valueOf(body.getOrDefault("description", ""))
         );
         return ApiResponse.ok(null);
+    }
+
+    @PostMapping(value = "/report-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Map<String, Object>> uploadReportImage(@RequestParam("file") MultipartFile file,
+                                                              HttpServletRequest request) {
+        if (file.isEmpty()) {
+            throw new BizException("请选择图片");
+        }
+        if (file.getSize() > 5 * 1024 * 1024L) {
+            throw new BizException("图片不能超过5MB");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BizException("只支持图片文件");
+        }
+
+        String originalName = StringUtils.cleanPath(file.getOriginalFilename() == null ? "" : file.getOriginalFilename());
+        String extension = "";
+        int dotIndex = originalName.lastIndexOf('.');
+        if (dotIndex >= 0) {
+            extension = originalName.substring(dotIndex).toLowerCase();
+        }
+        if (!Set.of(".jpg", ".jpeg", ".png", ".webp").contains(extension)) {
+            extension = ".jpg";
+        }
+
+        Path uploadDir = Paths.get("uploads", "reports").toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(uploadDir);
+            String filename = UUID.randomUUID().toString().replace("-", "") + extension;
+            Path target = uploadDir.resolve(filename);
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("url", "/uploads/reports/" + filename);
+            result.put("filename", filename);
+            return ApiResponse.ok(result);
+        } catch (IOException e) {
+            throw new BizException("图片上传失败");
+        }
     }
 }

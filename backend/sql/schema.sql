@@ -11,7 +11,7 @@ CREATE TABLE sys_user (
   booking_restricted_until DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE user_profile (
   user_id BIGINT PRIMARY KEY,
@@ -21,7 +21,7 @@ CREATE TABLE user_profile (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_profile_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE study_room (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -32,7 +32,7 @@ CREATE TABLE study_room (
   status TINYINT NOT NULL DEFAULT 1 COMMENT '1开放 0关闭',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE room_open_rule (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -42,7 +42,7 @@ CREATE TABLE room_open_rule (
   close_time TIME NOT NULL,
   CONSTRAINT fk_open_rule_room FOREIGN KEY (room_id) REFERENCES study_room(id),
   UNIQUE KEY uk_room_day_type (room_id, day_type)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE seat (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -56,7 +56,7 @@ CREATE TABLE seat (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_seat_room FOREIGN KEY (room_id) REFERENCES study_room(id),
   UNIQUE KEY uk_room_seat_no (room_id, seat_no)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE booking_rule (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -68,7 +68,7 @@ CREATE TABLE booking_rule (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_booking_rule_room FOREIGN KEY (room_id) REFERENCES study_room(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE seat_slot (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -83,7 +83,7 @@ CREATE TABLE seat_slot (
   CONSTRAINT fk_slot_seat FOREIGN KEY (seat_id) REFERENCES seat(id),
   UNIQUE KEY uk_seat_date_slot (seat_id, booking_date, slot_code),
   KEY idx_slot_status (booking_date, slot_code, status)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE booking_order (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -105,7 +105,7 @@ CREATE TABLE booking_order (
   CONSTRAINT fk_order_seat FOREIGN KEY (seat_id) REFERENCES seat(id),
   KEY idx_order_user_date (user_id, booking_date),
   KEY idx_order_room_date_slot (room_id, booking_date, slot_code, status)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE checkin_record (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -115,7 +115,7 @@ CREATE TABLE checkin_record (
   checkin_method TINYINT NOT NULL DEFAULT 1 COMMENT '1扫码',
   checkout_method TINYINT NOT NULL DEFAULT 1 COMMENT '1扫码',
   CONSTRAINT fk_checkin_order FOREIGN KEY (order_id) REFERENCES booking_order(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE temp_leave_record (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -126,7 +126,7 @@ CREATE TABLE temp_leave_record (
   is_timeout TINYINT NOT NULL DEFAULT 0,
   CONSTRAINT fk_leave_order FOREIGN KEY (order_id) REFERENCES booking_order(id),
   KEY idx_leave_order (order_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE violation_record (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -137,7 +137,7 @@ CREATE TABLE violation_record (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_violation_user FOREIGN KEY (user_id) REFERENCES sys_user(id),
   KEY idx_violation_user (user_id, created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE violation_report (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -154,7 +154,7 @@ CREATE TABLE violation_report (
   CONSTRAINT fk_reporter_user FOREIGN KEY (reporter_user_id) REFERENCES sys_user(id),
   CONSTRAINT fk_report_seat FOREIGN KEY (seat_id) REFERENCES seat(id),
   KEY idx_report_status (status, created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE review (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -167,7 +167,7 @@ CREATE TABLE review (
   CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES sys_user(id),
   CONSTRAINT fk_review_room FOREIGN KEY (room_id) REFERENCES study_room(id),
   KEY idx_review_room (room_id, created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE notification (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -179,14 +179,14 @@ CREATE TABLE notification (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_notice_user FOREIGN KEY (user_id) REFERENCES sys_user(id),
   KEY idx_notice_user_read (user_id, is_read, created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE points_account (
   user_id BIGINT PRIMARY KEY,
   points_balance INT NOT NULL DEFAULT 0,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_points_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE points_txn (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -197,7 +197,7 @@ CREATE TABLE points_txn (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_points_txn_user FOREIGN KEY (user_id) REFERENCES sys_user(id),
   KEY idx_points_user (user_id, created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE coupon_template (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -206,7 +206,7 @@ CREATE TABLE coupon_template (
   valid_days INT NOT NULL DEFAULT 30,
   status TINYINT NOT NULL DEFAULT 1 COMMENT '1启用 0停用',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE user_coupon (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -219,7 +219,7 @@ CREATE TABLE user_coupon (
   CONSTRAINT fk_uc_user FOREIGN KEY (user_id) REFERENCES sys_user(id),
   CONSTRAINT fk_uc_tpl FOREIGN KEY (template_id) REFERENCES coupon_template(id),
   KEY idx_uc_user_status (user_id, status, expire_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE stats_daily (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
