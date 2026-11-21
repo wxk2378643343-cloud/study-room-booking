@@ -1,15 +1,33 @@
 # StudyHub 自习室预约系统
 
-StudyHub 提供自习室和座位浏览、预约、签到及离场流程。移动端面向预约用户，管理端面向自习室、座位、规则和报表管理。两端共用 Spring Boot API 和 MySQL。
+![Java 17](https://img.shields.io/badge/Java%2017-2563EB?style=flat-square)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-0F766E?style=flat-square)
+![Vue 3](https://img.shields.io/badge/Vue%203-334155?style=flat-square)
+![MySQL](https://img.shields.io/badge/MySQL-B45309?style=flat-square)
 
-| 目录 | 用途 |
+## 📌 项目简介
+
+面向自习室使用者和管理人员。用户在移动端浏览、预约座位并签到，管理人员维护座位、规则和报表。
+
+## 🏗️ 系统架构
+
+- 移动端和管理端共享 Spring Boot API。
+- MySQL 保存自习室、座位、预约与用户数据，两个前端分别通过 Nginx 对接 API。
+
+## 📁 项目结构
+
+| 路径 | 用途 |
 | --- | --- |
-| [backend](backend/README.md) | Java 17、Spring Boot API 和数据库初始化 |
-| [mobile-web](mobile-web/) | Vue 3 移动端 |
-| [admin-web](admin-web/) | Vue 3 管理端 |
-| [docs](docs/) | 系统设计、使用与启动说明 |
+| [`backend`](backend) | API 和数据库初始化 |
+| [`mobile-web`](mobile-web) | 移动端 |
+| [`admin-web`](admin-web) | 管理端 |
+| [`docs`](docs) | 设计及启动指南 |
 
-## Docker 本地部署
+## 🚀 如何启动
+
+可以用 Compose 一次启动两个前端、后端和数据库。
+
+### Docker 本地部署
 
 需要 Docker 和 Compose v2。在仓库根目录创建 `.env`，填写以下变量。
 
@@ -33,7 +51,7 @@ MySQL 首次启动时创建数据库和应用用户，后端首次运行时初�
 
 使用 `docker compose logs --tail=100` 查看日志。使用 `docker compose down` 停止服务并保留数据卷。
 
-## 本地开发
+### 本地开发
 
 安装 JDK 17、Maven、MySQL 8 和 Node.js 22。启动 MySQL 后，按 [后端说明](backend/README.md) 配置数据库连接。在三个终端分别运行以下命令。
 
